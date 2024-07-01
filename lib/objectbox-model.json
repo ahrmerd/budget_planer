@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:8444393891869726928",
-      "lastPropertyId": "4:8857077328219307050",
+      "lastPropertyId": "6:8157010977288759610",
       "name": "Budget",
       "properties": [
         {
@@ -28,14 +28,67 @@
           "id": "4:8857077328219307050",
           "name": "currentBalance",
           "type": 8
+        },
+        {
+          "id": "5:6468625096886518448",
+          "name": "startDate",
+          "type": 10
+        },
+        {
+          "id": "6:8157010977288759610",
+          "name": "endDate",
+          "type": 10
+        }
+      ],
+      "relations": [
+        {
+          "id": "1:4681175441900231344",
+          "name": "expenses",
+          "targetId": "2:1322652850268329735"
+        }
+      ]
+    },
+    {
+      "id": "2:1322652850268329735",
+      "lastPropertyId": "5:1134241395884482669",
+      "name": "Expense",
+      "properties": [
+        {
+          "id": "1:1465830186109877265",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3709625882902472405",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "3:2937239681885060308",
+          "name": "amount",
+          "type": 8
+        },
+        {
+          "id": "4:5890076795679813132",
+          "name": "date",
+          "type": 10
+        },
+        {
+          "id": "5:1134241395884482669",
+          "name": "budgetId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "1:6174149284265483070",
+          "relationTarget": "Budget"
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "1:8444393891869726928",
-  "lastIndexId": "0:0",
-  "lastRelationId": "0:0",
+  "lastEntityId": "2:1322652850268329735",
+  "lastIndexId": "1:6174149284265483070",
+  "lastRelationId": "1:4681175441900231344",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,

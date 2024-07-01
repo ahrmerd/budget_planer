@@ -1,4 +1,4 @@
-import 'package:budget_planer/pages/home.dart';
+import 'package:budget_planer/pages/main_page.dart';
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Budget Planner',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: HomePage(),
+      home: MainPage(),
     );
   }
 }
