@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import '../objectbox.g.dart';
 
 class BudgetPage extends StatefulWidget {
-  const BudgetPage({Key? key}) : super(key: key);
+  const BudgetPage({super.key});
 
   @override
   _BudgetPageState createState() => _BudgetPageState();
@@ -14,6 +14,7 @@ class BudgetPage extends StatefulWidget {
 
 class _BudgetPageState extends State<BudgetPage> {
   late final Box<Budget> budgetBox;
+  final currencyFormat = NumberFormat.currency(locale: 'en-NG',name: 'NGN');
 
   @override
   void initState() {
@@ -22,9 +23,17 @@ class _BudgetPageState extends State<BudgetPage> {
   }
   
   @override
-  Widget build(BuildContext context) {
+ Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Budgets')),
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor,
+        title: const Text(
+          'My Budgets',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
       body: StreamBuilder<List<Budget>>(
         stream: budgetBox
             .query()
@@ -32,26 +41,243 @@ class _BudgetPageState extends State<BudgetPage> {
             .map((query) => query.find()),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           final budgets = snapshot.data!;
-          return ListView.builder(
-            itemCount: budgets.length,
-            itemBuilder: (context, index) {
-              final budget = budgets[index];
-              return ListTile(
-                title: Text(budget.name),
-                subtitle: Text('${DateFormat('MMM d, y').format(budget.startDate)} - ${DateFormat('MMM d, y').format(budget.endDate)}'),
-                trailing: Text('${budget.currentBalance.toStringAsFixed(2)} / ${budget.totalAmount.toStringAsFixed(2)}'),
-                onTap: () => _showBudgetOptions(budget),
-              );
-            },
-          );
+          return budgets.isEmpty
+              ? _buildEmptyState()
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: budgets.length,
+                  itemBuilder: (context, index) {
+                    final budget = budgets[index];
+                    return _buildBudgetCard(budget);
+                  },
+                );
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showBudgetDialog(context),
-        child: Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('New Budget'),
+        elevation: 4,
+      ),
+    );
+  }
+
+  
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.account_balance_wallet_outlined,
+            size: 80,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No budgets yet',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Create your first budget to start tracking',
+            style: TextStyle(color: Colors.grey[600]),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBudgetCard(Budget budget) {
+    final progress = budget.currentBalance / budget.totalAmount;
+    final remainingAmount = budget.totalAmount - budget.currentBalance;
+    final progressColor = progress < 0.7 
+        ? Colors.green 
+        : progress < 0.9 
+            ? Colors.orange 
+            : Colors.red;
+
+    final daysLeft = budget.endDate.difference(DateTime.now()).inDays;
+    final dailyBudget = remainingAmount / (daysLeft > 0 ? daysLeft : 1);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () => _showBudgetOptions(budget),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      budget.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: progressColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${(progress * 100).toInt()}% Used',
+                      style: TextStyle(
+                        color: progressColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Progress and remaining amount section
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Spent',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          'Remaining',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          currencyFormat.format(budget.currentBalance),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          currencyFormat.format(remainingAmount),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: remainingAmount > 0 ? Colors.green : Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Stack(
+                        children: [
+                          LinearProgressIndicator(
+                            value: progress,
+                            backgroundColor: Colors.grey[200],
+                            valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+                            minHeight: 17,
+                          ),
+                          if (progress > 0.1)
+                            Positioned.fill(
+                              child: Center(
+                                child: Text(
+                                  '${currencyFormat.format(budget.currentBalance)} of ${currencyFormat.format(budget.totalAmount)}',
+                                  style: const TextStyle(
+                                    color: Colors.brown,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Daily budget and date range
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Daily Budget',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        currencyFormat.format(dailyBudget),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        daysLeft > 0 ? "$daysLeft days left" : "Ended",
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        '${DateFormat('MMM d').format(budget.startDate)} - ${DateFormat('MMM d').format(budget.endDate)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -64,16 +290,16 @@ class _BudgetPageState extends State<BudgetPage> {
           child: Wrap(
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.edit),
-                title: Text('Edit Budget'),
+                leading: const Icon(Icons.edit),
+                title: const Text('Edit Budget'),
                 onTap: () {
                   Navigator.pop(context);
                   _showBudgetDialog(context, budget: budget);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete),
-                title: Text('Delete Budget'),
+                leading: const Icon(Icons.delete),
+                title: const Text('Delete Budget'),
                 onTap: () {
                   Navigator.pop(context);
                   _deleteBudget(budget);
@@ -90,7 +316,7 @@ class _BudgetPageState extends State<BudgetPage> {
     final nameController = TextEditingController(text: budget?.name ?? '');
     final amountController = TextEditingController(text: budget?.totalAmount.toString() ?? '');
     DateTime startDate = budget?.startDate ?? DateTime.now();
-    DateTime endDate = budget?.endDate ?? DateTime.now().add(Duration(days: 30));
+    DateTime endDate = budget?.endDate ?? DateTime.now().add(const Duration(days: 30));
 
     showDialog(
       context: context,
@@ -102,17 +328,17 @@ class _BudgetPageState extends State<BudgetPage> {
             children: [
               TextField(
                 controller: nameController,
-                decoration: InputDecoration(labelText: 'Budget Name'),
+                decoration: const InputDecoration(labelText: 'Budget Name'),
               ),
               TextField(
                 controller: amountController,
-                decoration: InputDecoration(labelText: 'Total Amount'),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(labelText: 'Total Amount'),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
               ),
               ListTile(
-                title: Text('Start Date'),
+                title: const Text('Start Date'),
                 subtitle: Text(DateFormat('MMM d, y').format(startDate)),
-                trailing: Icon(Icons.calendar_today),
+                trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -128,9 +354,9 @@ class _BudgetPageState extends State<BudgetPage> {
                 },
               ),
               ListTile(
-                title: Text('End Date'),
+                title: const Text('End Date'),
                 subtitle: Text(DateFormat('MMM d, y').format(endDate)),
-                trailing: Icon(Icons.calendar_today),
+                trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -151,7 +377,7 @@ class _BudgetPageState extends State<BudgetPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
@@ -210,17 +436,17 @@ class _BudgetPageState extends State<BudgetPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Deletion'),
-          content: Text('Are you sure you want to delete this budget?'),
+          title: const Text('Confirm Deletion'),
+          content: const Text('Are you sure you want to delete this budget?'),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Delete'),
+              child: const Text('Delete'),
               onPressed: () {
                 budgetBox.remove(budget.id);
                 Navigator.of(context).pop();

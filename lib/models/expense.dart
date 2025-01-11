@@ -7,6 +7,7 @@ import 'package:objectbox/objectbox.dart';
 class Expense {
   int id;
   String description;
+  String? category;
   double amount;
   DateTime date;
   final budget = ToOne<Budget>();
@@ -15,6 +16,7 @@ class Expense {
     this.id = 0,
     required this.description,
     required this.amount,
+    this.category = 'Other',
     required this.date,
   });
 }

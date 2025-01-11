@@ -45,12 +45,17 @@
           "id": "1:4681175441900231344",
           "name": "expenses",
           "targetId": "2:1322652850268329735"
+        },
+        {
+          "id": "2:1041788189584677940",
+          "name": "financialGoals",
+          "targetId": "3:165066691281948701"
         }
       ]
     },
     {
       "id": "2:1322652850268329735",
-      "lastPropertyId": "5:1134241395884482669",
+      "lastPropertyId": "6:778556677460380388",
       "name": "Expense",
       "properties": [
         {
@@ -81,14 +86,71 @@
           "flags": 520,
           "indexId": "1:6174149284265483070",
           "relationTarget": "Budget"
+        },
+        {
+          "id": "6:778556677460380388",
+          "name": "category",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:165066691281948701",
+      "lastPropertyId": "8:3248475942541377389",
+      "name": "FinancialGoal",
+      "properties": [
+        {
+          "id": "1:8230789016863608235",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4357330916520939838",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:3301816603362547504",
+          "name": "targetAmount",
+          "type": 8
+        },
+        {
+          "id": "4:7247023816910299493",
+          "name": "currentAmount",
+          "type": 8
+        },
+        {
+          "id": "5:7390114392330815291",
+          "name": "startDate",
+          "type": 10
+        },
+        {
+          "id": "6:7572069723268964198",
+          "name": "targetDate",
+          "type": 10
+        },
+        {
+          "id": "7:7148971178051190192",
+          "name": "achievedDate",
+          "type": 10
+        },
+        {
+          "id": "8:3248475942541377389",
+          "name": "budgetId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "2:1315920027408731965",
+          "relationTarget": "Budget"
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "2:1322652850268329735",
-  "lastIndexId": "1:6174149284265483070",
-  "lastRelationId": "1:4681175441900231344",
+  "lastEntityId": "3:165066691281948701",
+  "lastIndexId": "2:1315920027408731965",
+  "lastRelationId": "2:1041788189584677940",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
